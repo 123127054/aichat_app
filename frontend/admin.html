@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI 助手 - 管理后台</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.3/font/bootstrap-icons.css">
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      padding: 20px;
+    }
+    .log-container {
+      background-color: #f8f9fa;
+      border-radius: 5px;
+      padding: 15px;
+      height: 70vh;
+      overflow-y: auto;
+      font-family: monospace;
+      white-space: pre-wrap;
+      font-size: 0.9rem;
+    }
+    .log-entry {
+      margin-bottom: 5px;
+      border-bottom: 1px solid #eee;
+      padding-bottom: 5px;
+    }
+    .log-entry.info {
+      color: #0d6efd;
+    }
+    .log-entry.warning {
+      color: #ffc107;
+    }
+    .log-entry.error {
+      color: #dc3545;
+    }
+    .log-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+    .log-filter {
+      display: flex;
+      gap: 10px;
+    }
+    .log-filter label {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div class="container-fluid">
+    <div class="row mb-4">
+      <div class="col">
+        <h2><i class="bi bi-gear"></i> AI 助手管理后台</h2>
+        <p class="text-muted">查看系统日志和对话记录</p>
+      </div>
+      <div class="col-auto">
+        <a href="/" class="btn btn-outline-primary">
+          <i class="bi bi-chat"></i> 返回聊天界面
+        </a>
+      </div>
+    </div>
+    
+    <div class="row">
+      <div class="col-md-3">
+        <div class="card">
+          <div class="card-header">
+            <h5 class="mb-0">日志文件</h5>
+          </div>
+          <div class="card-body p-0">
+            <div class="list-group list-group-flush" id="log-files">
+              <!-- 日志文件列表将通过JS动态生成 -->
+              <div class="text-center p-3">
+                <div class="spinner-border text-primary" role="status">
+                  <span class="visually-hidden">加载中...</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="col-md-9">
+        <div class="card">
+          <div class="card-header log-header">
+            <h5 class="mb-0" id="current-log-title">日志内容</h5>
+            <div class="log-filter">
+              <label>
+                <input type="checkbox" id="filter-info" checked>
+                <span class="badge bg-primary">INFO</span>
+              </label>
+              <label>
+                <input type="checkbox" id="filter-warning" checked>
+                <span class="badge bg-warning">WARNING</span>
+              </label>
+              <label>
+                <input type="checkbox" id="filter-error" checked>
+                <span class="badge bg-danger">ERROR</span>
+              </label>
+              <button id="refresh-btn" class="btn btn-sm btn-outline-secondary">
+                <i class="bi bi-arrow-clockwise"></i> 刷新
+              </button>
+            </div>
+          </div>
+          <div class="card-body p-0">
+            <div class="log-container" id="log-content">
+              <div class="text-center p-5">
+                <p class="text-muted">请从左侧选择日志文件</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // 全局变量
+    let currentLogFile = null;
+    const API_BASE_URL = window.location.origin;
+    
+    // DOM 元素
+    const logFilesContainer = document.getElementById('log-files');
+    const logContentContainer = document.getElementById('log-content');
+    const currentLogTitle = document.getElementById('current-log-title');
+    const refreshBtn = document.getElementById('refresh-btn');
+    const filterInfo = document.getElementById('filter-info');
+    const filterWarning = document.getElementById('filter-warning');
+    const filterError = document.getElementById('filter-error');
+    
+    // 初始化
+    document.addEventListener('DOMContentLoaded', function() {
+      loadLogFiles();
+      
+      // 添加事件监听器
+      refreshBtn.addEventListener('click', function() {
+        if (currentLogFile) {
+          loadLogContent(currentLogFile);
+        }
+      });
+      
+      // 添加过滤器事件监听器
+      [filterInfo, filterWarning, filterError].forEach(filter => {
+        filter.addEventListener('change', applyFilters);
+      });
+    });
+    
+    // 加载日志文件列表
+    function loadLogFiles() {
+      fetch(`${API_BASE_URL}/logs`)
+        .then(response => response.json())
+        .then(data => {
+          logFilesContainer.innerHTML = '';
+          
+          if (data.logs && data.logs.length > 0) {
+            // 按日期排序（最新的在前面）
+            data.logs.sort().reverse();
+            
+            data.logs.forEach(log => {
+              const item = document.createElement('a');
+              item.className = 'list-group-item list-group-item-action';
+              item.href = '#';
+              item.textContent = formatLogFileName(log);
+              item.dataset.filename = log;
+              
+              item.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                // 移除其他项目的活动状态
+                document.querySelectorAll('.list-group-item').forEach(el => {
+                  el.classList.remove('active');
+                });
+                
+                // 设置当前项目为活动状态
+                this.classList.add('active');
+                
+                // 加载日志内容
+                loadLogContent(this.dataset.filename);
+              });
+              
+              logFilesContainer.appendChild(item);
+            });
+            
+            // 默认加载第一个日志文件
+            if (data.logs.length > 0) {
+              const firstItem = logFilesContainer.querySelector('.list-group-item');
+              firstItem.classList.add('active');
+              loadLogContent(data.logs[0]);
+            }
+          } else {
+            logFilesContainer.innerHTML = '<div class="text-center p-3">没有找到日志文件</div>';
+          }
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          logFilesContainer.innerHTML = `<div class="text-center p-3 text-danger">加载日志文件失败: ${error.message}</div>`;
+        });
+    }
+    
+    // 加载日志内容
+    function loadLogContent(filename) {
+      currentLogFile = filename;
+      currentLogTitle.textContent = formatLogFileName(filename);
+      
+      logContentContainer.innerHTML = `
+        <div class="text-center p-5">
+          <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">加载中...</span>
+          </div>
+          <p class="mt-2">正在加载日志内容...</p>
+        </div>
+      `;
+      
+      fetch(`${API_BASE_URL}/logs/${filename}`)
+        .then(response => response.json())
+        .then(data => {
+          if (data.content) {
+            logContentContainer.innerHTML = '';
+            
+            data.content.forEach(line => {
+              const logEntry = document.createElement('div');
+              logEntry.className = 'log-entry';
+              logEntry.textContent = line;
+              
+              // 根据日志级别添加类
+              if (line.includes('[INFO]')) {
+                logEntry.classList.add('info');
+              } else if (line.includes('[WARNING]')) {
+                logEntry.classList.add('warning');
+              } else if (line.includes('[ERROR]')) {
+                logEntry.classList.add('error');
+              }
+              
+              logContentContainer.appendChild(logEntry);
+            });
+            
+            // 应用过滤器
+            applyFilters();
+            
+            // 滚动到底部
+            logContentContainer.scrollTop = logContentContainer.scrollHeight;
+          } else {
+            logContentContainer.innerHTML = '<div class="text-center p-5 text-muted">日志文件为空</div>';
+          }
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          logContentContainer.innerHTML = `<div class="text-center p-5 text-danger">加载日志内容失败: ${error.message}</div>`;
+        });
+    }
+    
+    // 应用过滤器
+    function applyFilters() {
+      const showInfo = filterInfo.checked;
+      const showWarning = filterWarning.checked;
+      const showError = filterError.checked;
+      
+      document.querySelectorAll('.log-entry').forEach(entry => {
+        if (entry.classList.contains('info') && !showInfo) {
+          entry.style.display = 'none';
+        } else if (entry.classList.contains('warning') && !showWarning) {
+          entry.style.display = 'none';
+        } else if (entry.classList.contains('error') && !showError) {
+          entry.style.display = 'none';
+        } else {
+          entry.style.display = '';
+        }
+      });
+    }
+    
+    // 格式化日志文件名
+    function formatLogFileName(filename) {
+      // 从 chat_20230101.log 格式中提取日期
+      const match = filename.match(/chat_(\d{4})(\d{2})(\d{2})\.log/);
+      if (match) {
+        const [_, year, month, day] = match;
+        return `${year}-${month}-${day} 日志`;
+      }
+      return filename;
+    }
+  </script>
+</body>
+</html>

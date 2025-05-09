@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI 智能助手</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.3/font/bootstrap-icons.css">
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="container-fluid">
+    <div class="row">
+      <!-- 侧边栏 -->
+      <div class="col-md-3 sidebar">
+        <div class="d-flex align-items-center justify-content-between mb-4 mt-3">
+          <h3 class="mb-0"><i class="bi bi-robot"></i> AI 助手</h3>
+          <a href="/admin" class="btn btn-sm btn-outline-secondary" title="管理后台">
+            <i class="bi bi-gear"></i>
+          </a>
+        </div>
+        
+        <button id="new-chat-btn" class="btn btn-primary w-100 mb-4">
+          <i class="bi bi-plus-circle"></i> 新建对话
+        </button>
+        
+        <div class="session-list" id="session-list">
+          <!-- 会话列表将通过JS动态生成 -->
+        </div>
+      </div>
+      
+      <!-- 主聊天区域 -->
+      <div class="col-md-9 main-content">
+        <div class="chat-header">
+          <h4 id="current-session-title">当前对话</h4>
+        </div>
+        
+        <div id="chat-container" class="chat-container">
+          <div class="welcome-message">
+            <h2>欢迎使用 AI 智能助手</h2>
+            <p>我可以帮助您回答问题、提供建议或进行日常对话。</p>
+          </div>
+          <!-- 消息内容将通过JS动态生成 -->
+        </div>
+        
+        <div class="input-container">
+          <div class="input-group">
+            <textarea id="user-input" class="form-control" placeholder="输入您的问题..." rows="1"></textarea>
+            <button id="send-btn" class="btn btn-primary">
+              <i class="bi bi-send"></i>
+            </button>
+          </div>
+          <div class="small text-muted mt-1">按 Enter 发送，Shift+Enter 换行</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
