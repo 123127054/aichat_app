@@ -44,4 +44,4 @@ pip install -r requirements.txt
 ```bash
 windows: 直接启动start_windows.bat
 ```
-
+![img.png](img.png)
