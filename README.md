@@ -38,8 +38,13 @@ pip install -r requirements.txt
 ```bash
 在init_db.py文件中配置数据库初始化sql语句
 ```
+### 4. 配置 LangChain 模型
 
-### 4. 启动应用
+```bash
+在config.py文件中配置 LangChain 模型路径
+```
+
+### 5. 启动应用
 
 ```bash
 windows: 直接启动start_windows.bat

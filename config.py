@@ -13,7 +13,7 @@ class Config:
     # 是否追踪数据库修改
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     # OpenAI API 密钥
-    OPENAI_API_KEY = "sk-csnkwjxdrxkxuhuxcqikdelgbhwyadipixeqwlgscpwdrlsx"
+    OPENAI_API_KEY = "你的API密钥"   # 我使用的是硅基流动的API密钥
     # OpenAI API 基础 URL
     OPENAI_API_BASE = "https://api.siliconflow.cn/v1/"
     # 使用的模型名称
