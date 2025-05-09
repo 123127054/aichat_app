@@ -48,5 +48,6 @@ pip install -r requirements.txt
 
 ```bash
 windows: 直接启动start_windows.bat
+启动成功直接访问localhost:5000
 ```
 ![img.png](img.png)
