@@ -25,3 +25,23 @@
 ```bash
 git clone <仓库地址>
 cd chat_app
+```
+
+### 2. 安装依赖
+
+```bash
+pip install -r requirements.txt
+```
+
+### 3. 配置数据库
+
+```bash
+在init_db.py文件中配置数据库初始化sql语句
+```
+
+### 4. 启动应用
+
+```bash
+windows: 直接启动start_windows.bat
+```
+
